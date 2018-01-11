@@ -56,7 +56,7 @@ except:
     sys.exit()
 
 name    = "stream_monitor"
-version = "2018-01-11T1552Z"
+version = "2018-01-11T1609Z"
 
 def main(options):
 
