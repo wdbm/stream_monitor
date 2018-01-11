@@ -8,6 +8,11 @@ This program monitors a specified set of data streams (files) for changes. If a 
 pip install stream_monitor
 ```
 
+Set up a Pushbullet account, create an access token and store a Pushbullet token in hte file `~/.pushbullet`. Install Pushbullet on a mobile device.
+
+- [Pushbullet settings](https://www.pushbullet.com/#settings/account)
+- [Pushbullet Android](https://play.google.com/store/apps/details?id=com.pushbullet.android)
+
 # configuration and usage
 
 The file `stream_monitor_configuration.py` is imported as a module from the working directory. It contains a dictionary of the following form:
