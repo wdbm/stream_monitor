@@ -9,7 +9,7 @@ def main():
 
     setuptools.setup(
         name             = "stream_monitor",
-        version          = "2018.01.11.1609",
+        version          = "2018.01.22.0115",
         description      = "monitoring and alerting program for data streams such as recording files that update regularly",
         long_description = long_description(),
         url              = "https://github.com/wdbm/stream_monitor",

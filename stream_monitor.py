@@ -56,7 +56,7 @@ except:
     sys.exit()
 
 name    = "stream_monitor"
-version = "2018-01-11T1609Z"
+version = "2018-01-22T0115Z"
 
 def main(options):
 
@@ -65,7 +65,7 @@ def main(options):
             characteristics["last_modification_time"] = os.stat(os.path.expanduser(stream)).st_mtime
             current_time = (datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(0)).total_seconds()
             if current_time - characteristics["last_modification_time"] > characteristics["update_time"]:
-                alert(text = "stream {stream} has not updated within its expected update time of {update_time} s".format(
+                alert(text = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H%M%SZ") + " stream {stream} has not updated within its expected update time of {update_time} s".format(
                     stream      = stream,
                     update_time = characteristics["update_time"]
                 ))
@@ -76,8 +76,11 @@ def alert(
     ):
 
     print(text)
-    propyte.start_messaging_Pushbullet()
-    propyte.send_message_Pushbullet(text = text)
+    try:
+        propyte.start_messaging_Pushbullet()
+        propyte.send_message_Pushbullet(text = text)
+    except:
+        pass
 
 if __name__ == "__main__":
     options = docopt.docopt(__doc__)
