@@ -37,8 +37,11 @@ usage:
     program [options]
 
 options:
-    -h, --help  display help message
-    --version   display version and exit
+    -h, --help      display help message
+    --version       display version and exit
+
+    --alarms=BOOL   enable alarms             [default: true]
+    --verbose=BOOL  enable verbosity          [default: true]
 """
 
 import datetime
@@ -48,6 +51,7 @@ import sys
 import time
 
 import propyte
+import tonescale
 
 try:
     import stream_monitor_configuration
@@ -56,29 +60,46 @@ except:
     sys.exit()
 
 name    = "stream_monitor"
-version = "2018-01-22T0115Z"
+version = "2018-02-02T1637Z"
 
 def main(options):
 
+    alarms  = options["--alarms"].lower() == "true"
+    verbose = options["--verbose"].lower() == "true"
+
     while True:
+        print("\n" + datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S Z"))
         for stream, characteristics in (stream_monitor_configuration.streams.items()):
             characteristics["last_modification_time"] = os.stat(os.path.expanduser(stream)).st_mtime
             current_time = (datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(0)).total_seconds()
+            if verbose:
+                print("{stream} last modification time: {last_modification_time}".format(
+                    stream                 = stream.ljust(40),
+                    last_modification_time = datetime.datetime.fromtimestamp(int(characteristics["last_modification_time"])).strftime("%Y-%m-%d %H:%M:%S")
+                ))
             if current_time - characteristics["last_modification_time"] > characteristics["update_time"]:
                 alert(text = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H%M%SZ") + " stream {stream} has not updated within its expected update time of {update_time} s".format(
                     stream      = stream,
                     update_time = characteristics["update_time"]
                 ))
+                if alarms: play_alarm()
         time.sleep(60)
 
 def alert(
     text = "alert"
     ):
-
     print(text)
     try:
         propyte.start_messaging_Pushbullet()
         propyte.send_message_Pushbullet(text = text)
+    except:
+        pass
+
+def play_alarm():
+    try:
+        sound = tonescale.access_sound(name = "DynamicLoad_BSPNostromo_Ripley.023")
+        sound.repeat(number = 1)
+        sound.play(background = True)
     except:
         pass
 

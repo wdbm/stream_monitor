@@ -23,4 +23,4 @@ streams = {
 }
 ```
 
-When the script `stream_monitor.py` is executed, it imports the configuration and runs in a continuous loop, sending a Pushbullet alert whenever it detects that a stream is not being updated in its expected update time.
+When the script `stream_monitor.py` is executed, it imports the configuration and runs in a continuous loop, sending a Pushbullet alert whenever it detects that a stream is not being updated in its expected update time. The script has options for alarms and verbosity.

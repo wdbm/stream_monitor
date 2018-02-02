@@ -9,7 +9,7 @@ def main():
 
     setuptools.setup(
         name             = "stream_monitor",
-        version          = "2018.01.22.0115",
+        version          = "2018.02.02.1637",
         description      = "monitoring and alerting program for data streams such as recording files that update regularly",
         long_description = long_description(),
         url              = "https://github.com/wdbm/stream_monitor",
@@ -22,6 +22,7 @@ def main():
         install_requires = [
                            "docopt",
                            "propyte",
+                           "tonescale"
                            ],
         scripts          = [
                            "stream_monitor.py"
