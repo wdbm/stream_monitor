@@ -59,20 +59,23 @@ import technicolor
 import tonescale
 
 name    = "stream_monitor"
-version = "2018-04-19T2135Z"
-
-log = logging.getLogger(name)
-log.addHandler(technicolor.ColorisingStreamHandler())
-log.setLevel(logging.INFO)
+version = "2018-04-19T2211Z"
 
 def main(options = docopt.docopt(__doc__)):
-    if options["--version"]:
-        log.info(version)
-        exit()
     filepath_configuration =     options["--configuration"]
     alarms                 =     options["--alarms"].lower() == "true"
     interval               = int(options["--interval"])
     verbose                =     options["--verbose"].lower() == "true"
+    global log
+    log = logging.getLogger(name)
+    log.addHandler(technicolor.ColorisingStreamHandler())
+    if verbose:
+        log.setLevel(logging.DEBUG)
+    else:
+        log.setLevel(logging.INFO)
+    if options["--version"]:
+        log.info(version)
+        exit()
     if not exist_filepaths(filepaths = [filepath_configuration]): sys.exit()
     while True:
         configuration = lock.load_JSON(filepath_configuration)
