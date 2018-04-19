@@ -1,0 +1,5 @@
+{
+    "streams": {
+        "./recording.csv": {"update_time": 30}
+    }
+}

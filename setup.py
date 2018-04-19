@@ -2,35 +2,33 @@
 # -*- coding: utf-8 -*-
 
 import os
-
 import setuptools
 
 def main():
 
     setuptools.setup(
         name             = "stream_monitor",
-        version          = "2018.02.02.1637",
+        version          = "2018.04.19.2135",
         description      = "monitoring and alerting program for data streams such as recording files that update regularly",
         long_description = long_description(),
         url              = "https://github.com/wdbm/stream_monitor",
         author           = "Will Breaden Madden",
         author_email     = "wbm@protonmail.ch",
         license          = "GPLv3",
-        py_modules       = [
-                           "stream_monitor"
-                           ],
+        packages         = setuptools.find_packages(),
         install_requires = [
                            "docopt",
+                           "lock",
                            "propyte",
+                           "technicolor",
                            "tonescale"
                            ],
-        scripts          = [
-                           "stream_monitor.py"
-                           ],
-        entry_points     = """
-                           [console_scripts]
-                           stream_monitor = stream_monitor:stream_monitor
-                           """
+        entry_points     = {
+                           "console_scripts": (
+                              "stream_monitor=stream_monitor.__init__:main"
+                           )
+                           },
+        zip_safe         = False
     )
 
 def long_description(

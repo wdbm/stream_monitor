@@ -37,58 +37,65 @@ usage:
     program [options]
 
 options:
-    -h, --help      display help message
-    --version       display version and exit
+    -h, --help                display help message
+    --version                 display version and exit
 
-    --alarms=BOOL   enable alarms             [default: true]
-    --verbose=BOOL  enable verbosity          [default: true]
+    --configuration=FILEPATH  filepath of configuration    [default: stream_monitor_configuration.json]
+    --alarms=BOOL             enable alarms                [default: true]
+    --interval=INT            checking interval in seconds [default: 300]
+    --verbose=BOOL            enable verbosity             [default: true]
 """
 
 import datetime
 import docopt
+import logging
 import os
 import sys
 import time
 
+import lock
 import propyte
+import technicolor
 import tonescale
 
-try:
-    import stream_monitor_configuration
-except:
-    print("no configuration found")
-    sys.exit()
-
 name    = "stream_monitor"
-version = "2018-02-02T1637Z"
+version = "2018-04-19T2135Z"
 
-def main(options):
+log = logging.getLogger(name)
+log.addHandler(technicolor.ColorisingStreamHandler())
+log.setLevel(logging.INFO)
 
-    alarms  = options["--alarms"].lower() == "true"
-    verbose = options["--verbose"].lower() == "true"
-
+def main(options = docopt.docopt(__doc__)):
+    if options["--version"]:
+        log.info(version)
+        exit()
+    filepath_configuration =     options["--configuration"]
+    alarms                 =     options["--alarms"].lower() == "true"
+    interval               = int(options["--interval"])
+    verbose                =     options["--verbose"].lower() == "true"
+    if not exist_filepaths(filepaths = [filepath_configuration]): sys.exit()
     while True:
-        print("\n" + datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S Z"))
-        for stream, characteristics in (stream_monitor_configuration.streams.items()):
-            characteristics["last_modification_time"] = os.stat(os.path.expanduser(stream)).st_mtime
-            current_time = (datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(0)).total_seconds()
-            if verbose:
-                print("{stream} last modification time: {last_modification_time}".format(
-                    stream                 = stream.ljust(40),
-                    last_modification_time = datetime.datetime.fromtimestamp(int(characteristics["last_modification_time"])).strftime("%Y-%m-%d %H:%M:%S")
-                ))
-            if current_time - characteristics["last_modification_time"] > characteristics["update_time"]:
-                alert(text = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H%M%SZ") + " stream {stream} has not updated within its expected update time of {update_time} s".format(
-                    stream      = stream,
-                    update_time = characteristics["update_time"]
-                ))
-                if alarms: play_alarm()
-        time.sleep(60)
+        configuration = lock.load_JSON(filepath_configuration)
+        log.info("\n" + datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S Z"))
+        for stream, characteristics in (configuration["streams"].items()):
+            if exist_filepaths(filepaths = [stream]):
+                characteristics["last_modification_time"] = os.stat(os.path.expanduser(stream)).st_mtime
+                current_time = (datetime.datetime.utcnow() - datetime.datetime.utcfromtimestamp(0)).total_seconds()
+                if verbose:
+                    log.info("{stream} last modification time: {last_modification_time}".format(
+                        stream                 = stream.ljust(40),
+                        last_modification_time = datetime.datetime.fromtimestamp(int(characteristics["last_modification_time"])).strftime("%Y-%m-%d %H:%M:%S")
+                    ))
+                if current_time - characteristics["last_modification_time"] > characteristics["update_time"]:
+                    alert(text = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H%M%SZ") + " {stream} has not updated within its expected update time of {update_time} s".format(
+                        stream      = stream,
+                        update_time = characteristics["update_time"]
+                    ))
+                    if alarms: play_alarm()
+        time.sleep(interval)
 
-def alert(
-    text = "alert"
-    ):
-    print(text)
+def alert(text = "alert"):
+    log.info(text)
     try:
         propyte.start_messaging_Pushbullet()
         propyte.send_message_Pushbullet(text = text)
@@ -103,9 +110,21 @@ def play_alarm():
     except:
         pass
 
+def exist_filepaths(filepaths = None):
+    if not filepaths:
+        log.error("no filepaths specified")
+        return False
+    status = {}
+    for filepath in filepaths:
+        status[filepath] = os.path.isfile(filepath)
+    filepaths_nonexistent = [k for k, v in list(status.items()) if not v]
+    for filepath in filepaths_nonexistent:
+        log.warning("{filepath} not found".format(filepath = filepath))
+    if filepaths_nonexistent:
+        return False
+    else:
+        return True
+
 if __name__ == "__main__":
-    options = docopt.docopt(__doc__)
-    if options["--version"]:
-        print(version)
-        exit()
-    main(options)
+    main()
+

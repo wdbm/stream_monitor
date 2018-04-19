@@ -15,12 +15,16 @@ Set up a Pushbullet account, create an access token and store a Pushbullet token
 
 # configuration and usage
 
-The file `stream_monitor_configuration.py` is imported as a module from the working directory. It contains a dictionary of the following form:
+A JSON configuration file (by default `stream_monitor_configuration.json`) guides the program on the streams to monitor and their required update times. Its contents are of the following form:
 
 ```Python
-streams = {
-    "./recording.csv": {"update_time": 30}
+{
+    "streams": {
+        "./recording.csv": {"update_time"}: 30
+    }
 }
 ```
 
-When the script `stream_monitor.py` is executed, it imports the configuration and runs in a continuous loop, sending a Pushbullet alert whenever it detects that a stream is not being updated in its expected update time. The script has options for alarms and verbosity.
+In this example configuration, `recording.csv` is a filepath to monitor for changes and `30` is the time in seconds within which the filepath should change.
+
+When the program `stream_monitor` is executed, it imports the configuration and runs in a continuous loop, sending a Pushbullet alert whenever it detects that a stream is not being updated in its expected update time. The script has options for the configuration filepath, alarms, checking interval and verbosity (see `stream_monitor --help`).
