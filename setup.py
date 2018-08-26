@@ -8,7 +8,7 @@ def main():
 
     setuptools.setup(
         name             = "stream_monitor",
-        version          = "2018.04.19.2211",
+        version          = "2018.08.26.1543",
         description      = "monitoring and alerting program for data streams such as recording files that update regularly",
         long_description = long_description(),
         url              = "https://github.com/wdbm/stream_monitor",
@@ -19,14 +19,13 @@ def main():
         install_requires = [
                            "docopt",
                            "lock",
-                           "propyte",
+                           "scalar",
                            "technicolor",
                            "tonescale"
                            ],
+        python_requires  = ">=3",
         entry_points     = {
-                           "console_scripts": (
-                              "stream_monitor=stream_monitor.__init__:main"
-                           )
+                           "console_scripts": ("stream_monitor = stream_monitor.__init__:main")
                            },
         zip_safe         = False
     )

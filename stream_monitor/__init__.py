@@ -41,27 +41,34 @@ options:
     --version                 display version and exit
 
     --configuration=FILEPATH  filepath of configuration    [default: stream_monitor_configuration.json]
-    --alarms=BOOL             enable alarms                [default: true]
+    --alarms=BOOL             enable alarms                [default: false]
     --interval=INT            checking interval in seconds [default: 300]
     --verbose=BOOL            enable verbosity             [default: true]
 """
 
+import sys
+if sys.version_info[0] <= 2:
+    print("Python >2 required")
+    sys.exit(1)
 import datetime
 import docopt
 import logging
 import os
-import sys
 import time
 
 import lock
-import propyte
+import scalar
 import technicolor
 import tonescale
 
-name    = "stream_monitor"
-version = "2018-04-19T2211Z"
+name        = "stream_monitor"
+__version__ = "2018-08-26T1543Z"
 
-def main(options = docopt.docopt(__doc__)):
+global options
+
+def main():
+    global options
+    options = docopt.docopt(__doc__, version = __version__)
     filepath_configuration =     options["--configuration"]
     alarms                 =     options["--alarms"].lower() == "true"
     interval               = int(options["--interval"])
@@ -73,10 +80,8 @@ def main(options = docopt.docopt(__doc__)):
         log.setLevel(logging.DEBUG)
     else:
         log.setLevel(logging.INFO)
-    if options["--version"]:
-        log.info(version)
-        exit()
-    if not exist_filepaths(filepaths = [filepath_configuration]): sys.exit()
+    if not exist_filepaths(filepaths = [filepath_configuration]):
+        sys.exit()
     while True:
         configuration = lock.load_JSON(filepath_configuration)
         log.info("\n" + datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S Z"))
@@ -100,8 +105,7 @@ def main(options = docopt.docopt(__doc__)):
 def alert(text = "alert"):
     log.info(text)
     try:
-        propyte.start_messaging_Pushbullet()
-        propyte.send_message_Pushbullet(text = text)
+        scalar.alert(message = text)
     except:
         pass
 
@@ -130,4 +134,3 @@ def exist_filepaths(filepaths = None):
 
 if __name__ == "__main__":
     main()
-
